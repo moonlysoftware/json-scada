@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "amqplib": "^0.10.3",
     "fs": "*",
     "jsonpath-plus": "^7.2.0",
     "mongodb": "^5.7.0",
@@ -19,6 +20,7 @@
     "streamifier": "^0.1.1",
     "timers": "^0.1.1",
     "vm2": "^3.9.8",
-    "winston": "^3.6.0"
+    "winston": "^3.6.0",
+    "dotenv": "^16.4.5"
   }
 }

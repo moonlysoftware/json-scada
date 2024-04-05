@@ -28,6 +28,7 @@ src/mqtt-sparkplug/mqtt-cli-shell.cmd
 src/mqtt-sparkplug/root.srl
 src/mqtt-sparkplug/scada.js
 src/mqtt-sparkplug/test.js
+src/mqtt-sparkplug/.env
 *.exclusivelock
 pg_hist_*.sql
 pg_rtdata_*.sql

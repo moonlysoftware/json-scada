@@ -26,7 +26,7 @@ services:
       - MONGO_INITDB_DATABASE=json_scada
     # to export mongodb port on main host!
     ports:
-      - "27017:27017"
+      - "27018:27017"
     # internal container port
     expose:
       - "27017"

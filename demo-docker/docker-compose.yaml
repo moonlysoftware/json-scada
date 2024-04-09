@@ -34,186 +34,186 @@ services:
       - jsdemo_net
   
   # Postgresql/TimescaleDB historian. Without auth! 
-  timescaledb:
-    image: timescale/timescaledb:latest-pg14
-    container_name: jsdemo_timescaledb
-    restart: unless-stopped
-    command: postgres -c shared_preload_libraries=timescaledb
-    environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
-      - POSTGRES_USER=postgres
-      #- POSTGRES_PASSWORD=passw0rd
-    volumes:
-      - ./postgres_seed:/docker-entrypoint-initdb.d/
-      #- ./timescale:/var/lib/postgresql
-    # to export postgresql port on main host!
-    ports:
-      - 5432:5432
-    # internal container port
-    expose:
-      - "5432"
-    links:
-      - jsdemo_mongorsn1
-    networks:
-      - jsdemo_net
+  # timescaledb:
+  #   image: timescale/timescaledb:latest-pg14
+  #   container_name: jsdemo_timescaledb
+  #   restart: unless-stopped
+  #   command: postgres -c shared_preload_libraries=timescaledb
+  #   environment:
+  #     - POSTGRES_HOST_AUTH_METHOD=trust
+  #     - POSTGRES_USER=postgres
+  #     #- POSTGRES_PASSWORD=passw0rd
+  #   volumes:
+  #     - ./postgres_seed:/docker-entrypoint-initdb.d/
+  #     #- ./timescale:/var/lib/postgresql
+  #   # to export postgresql port on main host!
+  #   ports:
+  #     - 5432:5432
+  #   # internal container port
+  #   expose:
+  #     - "5432"
+  #   links:
+  #     - jsdemo_mongorsn1
+  #   networks:
+  #     - jsdemo_net
 
   # Postgresql/TimescaleDB Process SQL hist files 
-  process_pg_hist:
-    image: timescale/timescaledb:latest-pg14
-    container_name: jsdemo_process_pg_hist
-    command: /sql/process_pg_hist.sh
-    restart: unless-stopped
-    environment:
-      - PSQL_PATH=/usr/local/bin
-      - PGPORT=5432
-      - PGHOST=jsdemo_timescaledb
-      - PGDATABASE=json_scada
-      - PGUSER=json_scada
-      - PGPASSWORD=
-    volumes:
-      - ./sql:/sql
-    links:
-      - jsdemo_mongorsn1
-      - timescaledb
-    networks:
-      - jsdemo_net
+  # process_pg_hist:
+  #   image: timescale/timescaledb:latest-pg14
+  #   container_name: jsdemo_process_pg_hist
+  #   command: /sql/process_pg_hist.sh
+  #   restart: unless-stopped
+  #   environment:
+  #     - PSQL_PATH=/usr/local/bin
+  #     - PGPORT=5432
+  #     - PGHOST=jsdemo_timescaledb
+  #     - PGDATABASE=json_scada
+  #     - PGUSER=json_scada
+  #     - PGPASSWORD=
+  #   volumes:
+  #     - ./sql:/sql
+  #   links:
+  #     - jsdemo_mongorsn1
+  #     - timescaledb
+  #   networks:
+  #     - jsdemo_net
 
   # Postgresql/TimescaleDB Process SQL current data files 
-  process_pg_rtdata:
-    image: timescale/timescaledb:latest-pg14
-    container_name: jsdemo_process_pg_rtdata
-    command: /sql/process_pg_rtdata.sh
-    restart: unless-stopped
-    environment:
-      - PSQL_PATH=/usr/local/bin
-      - PGPORT=5432
-      - PGHOST=jsdemo_timescaledb
-      - PGDATABASE=json_scada
-      - PGUSER=json_scada
-      - PGPASSWORD=
-    volumes:
-      - ./sql:/sql
-    links:
-      - jsdemo_mongorsn1
-      - timescaledb
-    networks:
-      - jsdemo_net
+  # process_pg_rtdata:
+  #   image: timescale/timescaledb:latest-pg14
+  #   container_name: jsdemo_process_pg_rtdata
+  #   command: /sql/process_pg_rtdata.sh
+  #   restart: unless-stopped
+  #   environment:
+  #     - PSQL_PATH=/usr/local/bin
+  #     - PGPORT=5432
+  #     - PGHOST=jsdemo_timescaledb
+  #     - PGDATABASE=json_scada
+  #     - PGUSER=json_scada
+  #     - PGPASSWORD=
+  #   volumes:
+  #     - ./sql:/sql
+  #   links:
+  #     - jsdemo_mongorsn1
+  #     - timescaledb
+  #   networks:
+  #     - jsdemo_net
 
-  grafana:
-    image: grafana/grafana:9.5.9
-    container_name: jsdemo_grafana
-    # you may need to set the docker user:group to be able to write grafana folder 
-    # set UID and GID variables 
-    # or change default user and  group ids
-    #user: "${UID:-1000}:${GID:-1000}"
-    restart: unless-stopped
-    volumes: 
-      - ./grafana_data:/var/lib/grafana
-    environment: 
-      - GF_SERVER_DOMAIN=127.0.0.1
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:8080/grafana/
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
-      # enable auto login of json-scada user with auth.proxy
-      - GF_AUTH_PROXY_ENABLED=true
-      - GF_AUTH_PROXY_ENABLE_LOGIN_TOKEN=true
-      - GF_AUTH_DISABLE_SIGNOUT_MENU=true
-      #- GF_AUTH_PROXY_WHITELIST=127.0.0.1
-      #- GF_AUTH_PROXY_HEADER_NAME=X-WEBAUTH-USER
-      #- GF_AUTH_PROXY_HEADER_PROPERTY=username
-      #- GF_AUTH_PROXY_AUTO_SIGN_UP=true      
+  # grafana:
+  #   image: grafana/grafana:9.5.9
+  #   container_name: jsdemo_grafana
+  #   # you may need to set the docker user:group to be able to write grafana folder 
+  #   # set UID and GID variables 
+  #   # or change default user and  group ids
+  #   #user: "${UID:-1000}:${GID:-1000}"
+  #   restart: unless-stopped
+  #   volumes: 
+  #     - ./grafana_data:/var/lib/grafana
+  #   environment: 
+  #     - GF_SERVER_DOMAIN=127.0.0.1
+  #     - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:8080/grafana/
+  #     - GF_SERVER_SERVE_FROM_SUB_PATH=true
+  #     # enable auto login of json-scada user with auth.proxy
+  #     - GF_AUTH_PROXY_ENABLED=true
+  #     - GF_AUTH_PROXY_ENABLE_LOGIN_TOKEN=true
+  #     - GF_AUTH_DISABLE_SIGNOUT_MENU=true
+  #     #- GF_AUTH_PROXY_WHITELIST=127.0.0.1
+  #     #- GF_AUTH_PROXY_HEADER_NAME=X-WEBAUTH-USER
+  #     #- GF_AUTH_PROXY_HEADER_PROPERTY=username
+  #     #- GF_AUTH_PROXY_AUTO_SIGN_UP=true      
 
-    # export grafana port to the host
-    ports:
-      - 3000:3000
-    expose:
-      - "3000"
-    links:
-      - timescaledb
-    networks:
-      - jsdemo_net
+  #   # export grafana port to the host
+  #   ports:
+  #     - 3000:3000
+  #   expose:
+  #     - "3000"
+  #   links:
+  #     - timescaledb
+  #   networks:
+  #     - jsdemo_net
   
   # IEC60870-5-104 CLIENT, will connect to a demo server on 207.180.242.96:2404
-  iec104client:
-    image: mcr.microsoft.com/dotnet/sdk:6.0
-    container_name: jsdemo_iec104client
-    command: sh -c "sleep 20 && /jsonscada_bin/iec104client"
-    restart: unless-stopped
-    volumes:
-      - ./conf:/conf
-      - ./bin:/jsonscada_bin
-    links:
-      - jsdemo_mongorsn1
-    networks:
-      - jsdemo_net
+  # iec104client:
+  #   image: mcr.microsoft.com/dotnet/sdk:6.0
+  #   container_name: jsdemo_iec104client
+  #   command: sh -c "sleep 20 && /jsonscada_bin/iec104client"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./conf:/conf
+  #     - ./bin:/jsonscada_bin
+  #   links:
+  #     - jsdemo_mongorsn1
+  #   networks:
+  #     - jsdemo_net
 
   # IEC60870-5-104 SERVER, accepts connection on 127.0.0.1:2404 (originator address 1)
-  iec104server:
-    image: mcr.microsoft.com/dotnet/sdk:6.0
-    container_name:  jsdemo_iec104server
-    command: sh -c "sleep 20 && /jsonscada_bin/iec104server"
-    restart: unless-stopped
-    volumes:
-      - ./conf:/conf
-      - ./bin:/jsonscada_bin
-    links:
-      - jsdemo_mongorsn1
-    # exports the iec 104 server port to the host
-    ports:
-      - 2404:2404
-    expose:
-      - "2404"
-    networks:
-      - jsdemo_net
+  # iec104server:
+  #   image: mcr.microsoft.com/dotnet/sdk:6.0
+  #   container_name:  jsdemo_iec104server
+  #   command: sh -c "sleep 20 && /jsonscada_bin/iec104server"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./conf:/conf
+  #     - ./bin:/jsonscada_bin
+  #   links:
+  #     - jsdemo_mongorsn1
+  #   # exports the iec 104 server port to the host
+  #   ports:
+  #     - 2404:2404
+  #   expose:
+  #     - "2404"
+  #   networks:
+  #     - jsdemo_net
 
   # process incoming data 
-  cs_data_processor:
-    image: node:20-alpine
-    container_name: jsdemo_cs_data_processor
-    command:  sh -c "cd /cs_data_processor && sleep 10 && node cs_data_processor.js"
-    restart: unless-stopped
-    volumes:
-      - ../src/cs_data_processor:/cs_data_processor
-      - ./sql:/sql
-      - ./conf:/conf
-    links:
-      - jsdemo_mongorsn1
-    networks:
-      - jsdemo_net
+  # cs_data_processor:
+  #   image: node:20-alpine
+  #   container_name: jsdemo_cs_data_processor
+  #   command:  sh -c "cd /cs_data_processor && sleep 10 && node cs_data_processor.js"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ../src/cs_data_processor:/cs_data_processor
+  #     - ./sql:/sql
+  #     - ./conf:/conf
+  #   links:
+  #     - jsdemo_mongorsn1
+  #   networks:
+  #     - jsdemo_net
 
   # custom script processor
-  cs_custom_processor:
-    image: node:20-alpine
-    container_name: jsdemo_cs_custom_processor
-    command:  sh -c "cd /cs_custom_processor && sleep 10 && node cs_custom_processor.js"
-    restart: unless-stopped
-    volumes:
-      - ../src/cs_custom_processor:/cs_custom_processor
-      - ./conf:/conf
-    links:
-      - jsdemo_mongorsn1
-    networks:
-      - jsdemo_net
+  # cs_custom_processor:
+  #   image: node:20-alpine
+  #   container_name: jsdemo_cs_custom_processor
+  #   command:  sh -c "cd /cs_custom_processor && sleep 10 && node cs_custom_processor.js"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ../src/cs_custom_processor:/cs_custom_processor
+  #     - ./conf:/conf
+  #   links:
+  #     - jsdemo_mongorsn1
+  #   networks:
+  #     - jsdemo_net
 
   # config server for excel
-  config_server_excel:
-    image: node:20-alpine
-    container_name: jsdemo_config_server_excel
-    command:  sh -c "cd /config_server_for_excel && sleep 10 && node index.js"
-    restart: unless-stopped
-    environment:
-      - JS_CSEXCEL_IP_BIND=0.0.0.0
-      - JS_CSEXCEL_HTTP_PORT=10001
-    ports:
-      - 10001:10001
-    expose:
-      - "10001"
-    volumes:
-      - ../src/config_server_for_excel:/config_server_for_excel
-      - ./conf:/conf
-    links:
-      - jsdemo_mongorsn1
-    networks:
-      - jsdemo_net
+  # config_server_excel:
+  #   image: node:20-alpine
+  #   container_name: jsdemo_config_server_excel
+  #   command:  sh -c "cd /config_server_for_excel && sleep 10 && node index.js"
+  #   restart: unless-stopped
+  #   environment:
+  #     - JS_CSEXCEL_IP_BIND=0.0.0.0
+  #     - JS_CSEXCEL_HTTP_PORT=10001
+  #   ports:
+  #     - 10001:10001
+  #   expose:
+  #     - "10001"
+  #   volumes:
+  #     - ../src/config_server_for_excel:/config_server_for_excel
+  #     - ./conf:/conf
+  #   links:
+  #     - jsdemo_mongorsn1
+  #   networks:
+  #     - jsdemo_net
 
   # mqtt sparkplug-b driver
   mqtt-sparkplug:
@@ -231,22 +231,22 @@ services:
 
 
   # OPC-UA Server
-  opcua_server:
-    image: node:20-alpine
-    container_name: jsdemo_opcua_server
-    command:  sh -c "cd /OPC-UA-Server && sleep 10 && node index.js"
-    restart: unless-stopped
-    ports:
-      - 4840:4840
-    expose:
-      - "4840"
-    volumes:
-      - ../src/OPC-UA-Server:/OPC-UA-Server
-      - ./conf:/conf
-    links:
-      - jsdemo_mongorsn1
-    networks:
-      - jsdemo_net
+  # opcua_server:
+  #   image: node:20-alpine
+  #   container_name: jsdemo_opcua_server
+  #   command:  sh -c "cd /OPC-UA-Server && sleep 10 && node index.js"
+  #   restart: unless-stopped
+  #   ports:
+  #     - 4840:4840
+  #   expose:
+  #     - "4840"
+  #   volumes:
+  #     - ../src/OPC-UA-Server:/OPC-UA-Server
+  #     - ./conf:/conf
+  #   links:
+  #     - jsdemo_mongorsn1
+  #   networks:
+  #     - jsdemo_net
 
   # realtime web server, will listen on some HTTP port NO AUTH/RBAC
   #server_realtime:
@@ -310,18 +310,18 @@ services:
       - jsdemo_net
     
   # calculation process
-  calculations:
-    image: node:20-alpine
-    container_name: jsdemo_calculations
-    command:  sh -c "sleep 15 && cd /jsonscada_bin/ && ./calculations"
-    restart: unless-stopped
-    volumes:
-      - ./conf:/conf
-      - ./bin:/jsonscada_bin
-    links:
-      - jsdemo_mongorsn1
-    networks:
-      - jsdemo_net
+  # calculations:
+  #   image: node:20-alpine
+  #   container_name: jsdemo_calculations
+  #   command:  sh -c "sleep 15 && cd /jsonscada_bin/ && ./calculations"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./conf:/conf
+  #     - ./bin:/jsonscada_bin
+  #   links:
+  #     - jsdemo_mongorsn1
+  #   networks:
+  #     - jsdemo_net
 
 #  # Dnp3 client: requires wine/proton as it is currently Windows-only
 #  dnp3_client_wine:

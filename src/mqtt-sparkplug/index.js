@@ -85,6 +85,7 @@ const MongoStatus = { HintMongoIsConnected: false };
     let rtCollection = null;
     let cmdCollection = null;
     let clientMongo = null;
+    let amqpClientObj = null;
     let connection = null;
 
     // process sparkplug queue
@@ -187,7 +188,7 @@ const MongoStatus = { HintMongoIsConnected: false };
     Log.log("MongoDB - Connecting to MongoDB server...", Log.levelMin);
 
     amqpClient.init();
-    
+
     while (true) {
         // repeat every 5 seconds
 
@@ -537,6 +538,83 @@ const MongoStatus = { HintMongoIsConnected: false };
                     clientMongo = null;
                     Log.log(err);
                 });
+
+        // manages amqp consumer
+
+        if (amqpClientObj == null && SparkplugClientObj.handle != null) {
+            amqpClientObj = true;
+            amqpClient.consume(function (message) {
+                const decodedMessage = JSON.parse(message.content.toString());
+
+                if (!decodedMessage.group_id) {
+                    return {
+                        status: "error",
+                        message: "No group id found",
+                    };
+                }
+                if (!decodedMessage.edge_node_id) {
+                    return {
+                        status: "error",
+                        message: "No edge node id found",
+                    };
+                }
+                if (!decodedMessage.device_id) {
+                    return {
+                        status: "error",
+                        message: "No device id found",
+                    };
+                }
+                if (!decodedMessage.metrics) {
+                    return {
+                        status: "error",
+                        message: "No metrics found",
+                    };
+                }
+
+                console.log("CMD RECEIVED: ", decodedMessage);
+
+                //publish CMD
+
+                let responseTopic =
+                    "spBv1.0/" +
+                    decodedMessage.group_id +
+                    "/NCMD/" +
+                    decodedMessage.edge_node_id;
+
+                let requestReplyMetrics = [
+                    {
+                        name: "command_response_topic",
+                        timestamp: new Date().getTime(),
+                        type: "string",
+                        value: responseTopic,
+                    },
+                    {
+                        name: "correlation_id",
+                        timestamp: new Date().getTime(),
+                        type: "string",
+                        value: "unique_id_test",
+                    },
+                ];
+
+                decodedMessage.metrics.push(...requestReplyMetrics);
+
+                SparkplugClientObj.handle.publishNodeCmd(
+                    decodedMessage.group_id,
+                    decodedMessage.edge_node_id,
+                    {
+                        timestamp: new Date().getTime(),
+                        metrics: decodedMessage.metrics,
+                    },
+                    {},
+                    (err) => {}
+                );
+
+                return {
+                    status: "success",
+                    message: "Message received",
+                };
+            });
+        }
 
         // wait 5 seconds
         await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -1745,7 +1823,7 @@ async function sparkplugProcess(
 
             // process MQTT Sparkplug B messages (coming from other devices)
             spClient.handle.on("message", function (topic, payload, topicInfo) {
-                console.log(payload)
+                console.log("payload", payload);
                 if (payload === undefined) {
                     return;
                 }
@@ -1776,17 +1854,10 @@ async function sparkplugProcess(
                     Log.log(logModS + "Invalid topic");
                 }
 
-                // payload.group1 = splTopic[1];
-                // payload.group2 = splTopic[3];
-                // payload.message_type = splTopic[2];
-                // amqpClient.produce(JSON.stringify(payload));
-                console.log("SHOULD PRODUCE", JSON.stringify(payload));
-                console.log('wajo topic: ', topic);
-                console.log('wajo topic info: ', topicInfo);
                 let amqpMessage = {
-                    'topicInfo': topicInfo,
-                    'payload': payload,
-                }
+                    topicInfo: topicInfo,
+                    payload: payload,
+                };
                 amqpClient.produce(JSON.stringify(amqpMessage));
 
                 let deviceLocator =
@@ -2157,7 +2228,6 @@ function queueMetric(metric, deviceLocator, isBirth, templateName) {
             break;
         // case 'datetime': // TODO ??
     }
-
 
     if ("properties" in metric) {
         if ("good" in metric.properties) {

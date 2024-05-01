@@ -461,6 +461,7 @@ function SparkplugClient(config) {
                 "              options: " + JSON.stringify(clientOptions)
             );
         }
+        
         client = mqtt.connect(serverUrl, clientOptions);
         sparkplugClient.client = client;
         logger.debug("Finished attempting to connect");

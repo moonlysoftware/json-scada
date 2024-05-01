@@ -544,8 +544,10 @@ const MongoStatus = { HintMongoIsConnected: false };
         if (amqpClientObj == null && SparkplugClientObj.handle != null) {
             amqpClientObj = true;
             amqpClient.consume(function (message) {
+                console.log("Message received: ", message);
                 const decodedMessage = JSON.parse(message.content.toString());
 
+                // Checks
                 if (!decodedMessage.group_id) {
                     return {
                         status: "error",
@@ -573,36 +575,34 @@ const MongoStatus = { HintMongoIsConnected: false };
 
                 console.log("CMD RECEIVED: ", decodedMessage);
 
-                //publish CMD
-
+                // Create response topic for MQTT following Sparkplug
                 let responseTopic =
                     "spBv1.0/" +
                     decodedMessage.group_id +
-                    "/NCMD/" +
+                    "/NDATA/" +
                     decodedMessage.edge_node_id;
 
-                let requestReplyMetrics = [
-                    {
-                        name: "command_response_topic",
-                        timestamp: new Date().getTime(),
-                        type: "string",
-                        value: responseTopic,
-                    },
+                // Add Request-Response metrics to payload
+                let uniqueCorrelationId =
+                    Date.now().toString(36) +
+                    Math.floor(
+                        Math.pow(10, 12) + Math.random() * 9 * Math.pow(10, 12)
+                    ).toString(36);
+                decodedMessage.metrics.push(
                     {
                         name: "correlation_id",
-                        timestamp: new Date().getTime(),
-                        type: "string",
-                        value: "unique_id_test",
-                    },
-                ];
+                        value: uniqueCorrelationId,
+                        type: "String",
+                    }
+                );
 
-                decodedMessage.metrics.push(...requestReplyMetrics);
+                // consumer
 
                 SparkplugClientObj.handle.publishNodeCmd(
                     decodedMessage.group_id,
                     decodedMessage.edge_node_id,
                     {
-                        timestamp: new Date().getTime(),
+                        timestamp: Math.floor(Date.now() / 1000),
                         metrics: decodedMessage.metrics,
                     },
                     {},
@@ -610,7 +610,7 @@ const MongoStatus = { HintMongoIsConnected: false };
                 );
 
                 return {
-                    status: "success",
+                    status: "12312312132123",
                     message: "Message received",
                 };
             });
@@ -1863,6 +1863,8 @@ async function sparkplugProcess(
                 let deviceLocator =
                     splTopic[0] + "/" + splTopic[1] + "/" + splTopic[3];
                 if (splTopic.length > 4) deviceLocator += "/" + splTopic[4];
+
+                // send response
 
                 if (splTopic.length)
                     switch (splTopic[2]) {
